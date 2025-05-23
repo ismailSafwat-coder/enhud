@@ -73,7 +73,7 @@ class _NotiState extends State<Noti> {
               if (pickedTime != null) {
                 // Schedule the notification with picked time
                 Notifications().scheduleNotification(
-                  id: 2,
+                  id: 4,
                   title: 'Scheduled Notification',
                   body: 'This is a scheduled notification',
                   hour: pickedTime.hour,

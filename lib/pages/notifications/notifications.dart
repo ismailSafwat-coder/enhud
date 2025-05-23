@@ -144,6 +144,10 @@ class Notifications {
     required int minute,
     String? payload,
   }) async {
+    tz.initializeTimeZones();
+    final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(currentTimeZone));
+
     final now = tz.TZDateTime.now(tz.local);
     var scheduledDate =
         tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);

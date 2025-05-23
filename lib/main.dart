@@ -25,9 +25,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   requestNotificationPermission();
 
-  tz.initializeTimeZones();
-  tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
-
   // Get current device timezone
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
