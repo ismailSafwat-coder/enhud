@@ -1,6 +1,5 @@
 // file: notifications_screen.dart
-
-import 'package:enhud/pages/core/core.dart';
+import 'package:enhud/core/core.dart';
 import 'package:flutter/material.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -26,14 +25,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ],
         ),
       ),
-      body: mynotificationitmes.isEmpty
+      body: notificationItemMap.isEmpty
           ? const Center(child: Text("No notifications yet"))
           : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: mynotificationitmes.length,
+              itemCount: notificationItemMap.length,
               itemBuilder: (context, index) {
                 return NotificationCard(
-                    notification: mynotificationitmes[index]);
+                    notification: notificationItemMap[index]);
               },
             ),
     );

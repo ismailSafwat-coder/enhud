@@ -149,6 +149,31 @@ class _StudyTimetableState extends State<StudyTimetable> {
     }
   }
 
+  Future<void> storeEoHive(Map<String, dynamic> newData) async {
+    try {
+      // 1. التحقق من أن الصندوق مفتوح وموجود
+      if (!mybox!.isOpen) {
+        throw Exception('Hive box is not open');
+      }
+
+      // 2. جلب البيانات الحالية أو إنشاء قائمة جديدة إذا لم تكن موجودة
+      List<Map<String, dynamic>> currentList = mybox!.containsKey('noti')
+          ? List.from(mybox!.get('noti')) // إنشاء نسخة جديدة من القائمة
+          : [];
+
+      // 3. إضافة البيانات الجديدة
+      currentList.add(newData);
+
+      // 4. حفظ القائمة المحدثة
+      await mybox!.put('noti', currentList);
+
+      print('تم تخزين البيانات بنجاح: $newData');
+    } catch (e) {
+      print('حدث خطأ أثناء التخزين: $e');
+      rethrow; // يمكنك التعامل مع الخطأ في مكان آخر إذا لزم الأمر
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     height = MediaQuery.sizeOf(context).height;
@@ -498,6 +523,17 @@ class _StudyTimetableState extends State<StudyTimetable> {
                         }
                         pickTimeAndScheduleNotification(context,
                             taskController.text, Descriptioncontroller.text);
+                        int currentWeekOffset = _currentWeekOffset;
+                        print(
+                            '{$_currentWeekOffset  -  $rowIndex    -$colIndex   -${taskController.text.trim()}}  -${Descriptioncontroller.text.trim()}}');
+                        Map<String, dynamic> notificationInfotoStore = {
+                          "week": _currentWeekOffset,
+                          "row": rowIndex,
+                          'column': colIndex,
+                          "title": taskController.text.trim(),
+                          "description": Descriptioncontroller.text.trim()
+                        };
+                        storeEoHive(notificationInfotoStore);
                       });
                       Navigator.of(context).pop();
                     },
