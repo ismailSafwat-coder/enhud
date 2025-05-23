@@ -33,10 +33,6 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   //init notifications
-
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
   await Notifications().initNotification();
 
   runApp(const MyApp());
@@ -62,11 +58,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'ُenhud',
       theme: ThemeData(
-        // textTheme: const TextTheme(
-        //   bodyLarge: commonTextStyle,
-        //   bodyMedium: midTextStyle,
-        //   bodySmall: commonTextStyle,
-        // ),
         scaffoldBackgroundColor: Colors.white,
         useMaterial3: true,
       ),

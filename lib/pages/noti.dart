@@ -1,8 +1,49 @@
+import 'dart:async';
+
 import 'package:enhud/pages/notifications/notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class Noti extends StatelessWidget {
+class Noti extends StatefulWidget {
   const Noti({super.key});
+
+  @override
+  State<Noti> createState() => _NotiState();
+}
+
+class _NotiState extends State<Noti> {
+  late StreamSubscription<NotificationResponse> _notificationSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Listen to notification actions
+    _notificationSubscription = Notifications()
+        .notificationResponseStream
+        .listen(_handleNotificationAction);
+  }
+
+  void _handleNotificationAction(NotificationResponse response) {
+    // Handle the action in your UI
+    if (response.actionId == '1') {
+      // Done action
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Task marked as done!'),
+      ));
+    } else if (response.actionId == '2') {
+      // Snooze action
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Task snoozed for 10 minutes'),
+      ));
+    }
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
