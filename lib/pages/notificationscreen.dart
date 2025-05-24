@@ -3,8 +3,6 @@ import 'package:enhud/core/core.dart';
 import 'package:enhud/main.dart';
 import 'package:flutter/material.dart';
 
-List<Map<String, dynamic>> Noti = mybox!.get('noti');
-
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
@@ -26,6 +24,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     "freetime": "",
     "Another Class": ""
   };
+
+  late List<Map<String, dynamic>> noti;
+
+  @override
+  void initState() {
+    super.initState();
+    var data = mybox!.get('noti');
+    if (data is List) {
+      noti = List<Map<String, dynamic>>.from(data.map((item) {
+        if (item is Map) {
+          return Map<String, dynamic>.from(item);
+        } else {
+          // يمكنك هنا التعامل مع الحالة الغير متوقعة
+          return {};
+        }
+      }));
+    } else {
+      noti = [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,13 +60,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ],
         ),
       ),
-      body: Noti.isEmpty
+      body: noti.isEmpty
           ? const Center(child: Text("No notifications yet"))
           : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: Noti.length,
+              itemCount: noti.length,
               itemBuilder: (context, index) {
-                return NotificationCard(notification: Noti[index]);
+                return NotificationCard(notification: noti[index]);
               },
             ),
     );

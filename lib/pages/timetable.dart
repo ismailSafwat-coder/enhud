@@ -689,6 +689,23 @@ class _StudyTimetableState extends State<StudyTimetable> {
                     onPressed: () {
                       setState(() {
                         if (taskController.text.isNotEmpty) {
+                          pickTimeAndScheduleNotification(
+                            timeSlots[rowIndex],
+                            context,
+                            taskController.text,
+                            Descriptioncontroller.text,
+                          );
+
+                          Map<String, dynamic> notificationInfotoStore = {
+                            "week": _currentWeekOffset,
+                            "row": rowIndex,
+                            'column': colIndex,
+                            "title": taskController.text.trim(),
+                            "description": Descriptioncontroller.text.trim(),
+                            "category": selectedCategory,
+                            "time": _extractFirstTime(timeSlots[rowIndex]),
+                          };
+                          storeEoHive(notificationInfotoStore);
                           // Update the current week's content
                           allWeeksContent[_currentWeekOffset][rowIndex]
                               [colIndex] = Container(
@@ -752,23 +769,6 @@ class _StudyTimetableState extends State<StudyTimetable> {
                           );
                           // Show the time picker
                         }
-                        pickTimeAndScheduleNotification(
-                          timeSlots[rowIndex],
-                          context,
-                          taskController.text,
-                          Descriptioncontroller.text,
-                        );
-
-                        Map<String, dynamic> notificationInfotoStore = {
-                          "week": _currentWeekOffset,
-                          "row": rowIndex,
-                          'column': colIndex,
-                          "title": taskController.text.trim(),
-                          "description": Descriptioncontroller.text.trim(),
-                          "category": selectedCategory,
-                          "time": _extractFirstTime(timeSlots[rowIndex]),
-                        };
-                        storeEoHive(notificationInfotoStore);
                       });
                       Navigator.of(context).pop();
                     },
