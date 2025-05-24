@@ -46,17 +46,6 @@ class _StudyTimetableState extends State<StudyTimetable> {
     "Another Class"
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _initNotifications();
-    _initializeWeeksContent();
-    // retriveDateFromhive();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      retriveDateFromhive();
-    });
-  }
-
   void _initNotifications() async {
     await Notifications().initNotification();
   }
@@ -135,20 +124,51 @@ class _StudyTimetableState extends State<StudyTimetable> {
         weekContent.add(List.filled(8, const Text('')));
       }
     });
+    _saveTimeSlots();
   }
 
+  // Future<void> pickTimeAndScheduleNotification(
+  //   String Timeslote,
+  //   BuildContext context,
+  //   String title,
+  //   String body,
+  // ) async {
+  //   if (startTime != null) {
+  //     Notifications().scheduleNotification(
+  //       id: 2,
+  //       title: title,
+  //       body: body,
+  //       hour: startTime!.hour,
+  //       minute: startTime!.minute,
+  //     );
+  //   }
+  // }
+
   Future<void> pickTimeAndScheduleNotification(
-    BuildContext context,
-    String title,
-    String body,
-  ) async {
-    if (startTime != null) {
+      String timeSlot, BuildContext context, String title, String body) async {
+    // استخراج الجزء الأول من الوقت فقط (مثلاً "08:00 am")
+    String rawTime = _extractFirstTime(timeSlot);
+
+    // تحويل النص إلى TimeOfDay
+    TimeOfDay? parsedTime = parseTime(rawTime);
+
+    if (parsedTime != null) {
+      // جدولة الإشعار
       Notifications().scheduleNotification(
-        id: 2,
+        id: DateTime.now().millisecondsSinceEpoch % 1000000000, // ID فريد
         title: title,
         body: body,
-        hour: startTime!.hour,
-        minute: startTime!.minute,
+        hour: parsedTime.hour,
+        minute: parsedTime.minute,
+      );
+
+      // يمكنك إضافة Toast أو SnackBar للتأكيد
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تم جدولة الإشعار عند $rawTime')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('فشل في قراءة الوقت')),
       );
     }
   }
@@ -193,19 +213,21 @@ class _StudyTimetableState extends State<StudyTimetable> {
   //       String description = dateFromHive[i]['description'];
   //       allWeeksContent[week][row][column] = Center(
   //           child: Column(
+
   //         children: [
   //           Text(
   //             title,
-  //             style: const TextStyle(fontSize: 18),
+  //             style: const TextStyle(fontSize: 30),
   //           ),
   //           Text(
   //             description,
-  //             style: const TextStyle(fontSize: 15),
+  //             style: const TextStyle(fontSize: 30),
   //           )
   //         ],
   //       ));
   //     }
   //   }
+  //   setState(() {});
   // }
 
   Future<void> retriveDateFromhive() async {
@@ -230,7 +252,12 @@ class _StudyTimetableState extends State<StudyTimetable> {
         final String title = data['title'] ?? '';
         final String description = data['description'] ?? '';
         final String category = data['category'] ?? '';
-        final TimeOfDay? time = data['time'];
+
+//time slots
+        while (allWeeksContent.length <= week) {
+          allWeeksContent.add(List.generate(
+              timeSlots.length, (_) => List.filled(8, const Text(''))));
+        }
 
         // Ensure week exists
         while (week >= allWeeksContent.length) {
@@ -285,15 +312,15 @@ class _StudyTimetableState extends State<StudyTimetable> {
         );
 
         // Schedule notification if time exists
-        if (time != null && title.isNotEmpty) {
-          Notifications().scheduleNotification(
-            id: DateTime.now().millisecondsSinceEpoch % 100000,
-            title: title,
-            body: description,
-            hour: time.hour,
-            minute: time.minute,
-          );
-        }
+        // if (title.isNotEmpty) {
+        //   Notifications().scheduleNotification(
+        //     id: DateTime.now().millisecondsSinceEpoch % 100000,
+        //     title: title,
+        //     body: description,
+        //     hour: time.hour,
+        //     minute: time.minute,
+        //   );
+        // }
       }
 
       setState(() {}); // Update UI after loading all data
@@ -316,6 +343,66 @@ class _StudyTimetableState extends State<StudyTimetable> {
       default:
         return const Color(0xff9bb7fa);
     }
+  }
+
+  Future<void> _saveTimeSlots() async {
+    if (!mybox!.isOpen) return;
+    await mybox!.put('timeSlots', timeSlots);
+  }
+
+  Future<void> _loadTimeSlots() async {
+    if (!mybox!.isOpen || !mybox!.containsKey('timeSlots')) return;
+
+    final List<String> savedSlots = mybox!.get('timeSlots');
+    setState(() {
+      timeSlots = savedSlots;
+      // Initialize content for all weeks based on loaded time slots
+      for (var weekContent in allWeeksContent) {
+        while (weekContent.length < timeSlots.length) {
+          weekContent.add(List.filled(8, const Text('')));
+        }
+      }
+    });
+  }
+
+  String _extractFirstTime(String timeSlot) {
+    // تقسيم النص عند " - " وأخذ الجزء الأول
+    return timeSlot.split(' - ').first.trim();
+  }
+
+  TimeOfDay? parseTime(String timeString) {
+    // مثال: '08:00 am'
+    final RegExp timeRegex =
+        RegExp(r'(\d{1,2}):(\d{2})\s*(am|pm)', caseSensitive: false);
+    final Match? match = timeRegex.firstMatch(timeString.toLowerCase());
+
+    if (match != null) {
+      int hour = int.parse(match.group(1)!);
+      int minute = int.parse(match.group(2)!);
+      String period = match.group(3)!;
+
+      if (period == 'pm' && hour != 12) {
+        hour += 12;
+      } else if (period == 'am' && hour == 12) {
+        hour = 0;
+      }
+
+      return TimeOfDay(hour: hour, minute: minute);
+    }
+    return null; // إذا لم يتطابق التنسيق
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initNotifications();
+    _initializeWeeksContent();
+    // retriveDateFromhive();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadTimeSlots();
+      await retriveDateFromhive();
+    });
   }
 
   @override
@@ -665,8 +752,12 @@ class _StudyTimetableState extends State<StudyTimetable> {
                           );
                           // Show the time picker
                         }
-                        pickTimeAndScheduleNotification(context,
-                            taskController.text, Descriptioncontroller.text);
+                        pickTimeAndScheduleNotification(
+                          timeSlots[rowIndex],
+                          context,
+                          taskController.text,
+                          Descriptioncontroller.text,
+                        );
 
                         Map<String, dynamic> notificationInfotoStore = {
                           "week": _currentWeekOffset,
@@ -675,7 +766,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
                           "title": taskController.text.trim(),
                           "description": Descriptioncontroller.text.trim(),
                           "category": selectedCategory,
-                          "time": startTime,
+                          "time": _extractFirstTime(timeSlots[rowIndex]),
                         };
                         storeEoHive(notificationInfotoStore);
                       });

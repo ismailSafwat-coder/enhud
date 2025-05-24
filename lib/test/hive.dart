@@ -44,6 +44,7 @@ class _HiveState extends State<HiveTestPage> {
             MaterialButton(
               onPressed: () {
                 mybox!.delete('noti');
+                mybox!.delete('timeslots');
                 print('the date deleted secucfuly');
               },
               child: const Text('delete data with hive'),

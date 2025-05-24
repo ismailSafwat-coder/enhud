@@ -13,6 +13,19 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
+  Map<String, String> motivationmessges = {
+    "Material": 'You should go now so you won\'t be late',
+    "Task":
+        "You should solve the set of problems the theacher has requested in the last lesson now",
+    "Assignment":
+        "You should start in the project now to be able to meet the deadline.",
+    "Exam":
+        "You have an exam in physics tomorrow, You should start studying and revising well from now.",
+    "Activity": "You should go to gym now, Don't belazy to keep your fit.",
+    "sleep": "",
+    "freetime": "",
+    "Another Class": ""
+  };
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,19 +91,20 @@ class NotificationCard extends StatelessWidget {
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const Text("  •  "),
-              Text(notification['title'] ?? '',
+              Text(notification['category'] ?? '',
                   style: const TextStyle(fontSize: 14)),
               const Spacer(),
               const Icon(Icons.access_time, size: 16),
               const SizedBox(width: 4),
-              Text(notification['title'] ?? '',
+              Text(notification['time'] ?? '',
+                  // "3",
                   style: const TextStyle(fontSize: 14)),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            notification['title'] ?? '',
-            style: const TextStyle(fontSize: 14),
+            getmotivationmessage(
+                notification['category'], notification['title']),
           ),
           const SizedBox(height: 8),
           Row(
@@ -129,5 +143,23 @@ Color getColorFromName(String name) {
       return Colors.yellow.shade300;
     default:
       return Colors.grey.shade300;
+  }
+}
+
+String getmotivationmessage(String caregory, String title) {
+  switch (caregory.toLowerCase()) {
+    case 'Material':
+      return 'You should go now so you won\'t be late';
+    case 'Exam':
+      return 'You have an exam in physics tomorrow, You should start studying and revising well from now.';
+    case 'task':
+      return 'You should solve the set of problems the theacher has requested in the last lesson now';
+    case 'Assignment':
+      return 'You should start in the project now to be able to meet the deadline.';
+    case 'Activity':
+      return 'You should go to gym now, Don\'t belazy to keep your fit.';
+
+    default:
+      return 'good';
   }
 }
