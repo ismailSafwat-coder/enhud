@@ -51,6 +51,10 @@ class _StudyTimetableState extends State<StudyTimetable> {
     super.initState();
     _initNotifications();
     _initializeWeeksContent();
+    // retriveDateFromhive();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      retriveDateFromhive();
+    });
   }
 
   void _initNotifications() async {
@@ -171,6 +175,146 @@ class _StudyTimetableState extends State<StudyTimetable> {
     } catch (e) {
       print('حدث خطأ أثناء التخزين: $e');
       rethrow; // يمكنك التعامل مع الخطأ في مكان آخر إذا لزم الأمر
+    }
+  }
+
+  // Future retriveDateFromhive() async {
+  //   if (!mybox!.isOpen) {
+  //     print('Hive box is not open');
+  //   } else if (!mybox!.containsKey('noti')) {
+  //     print('Key "noti" does not exist in the box');
+  //   } else {
+  //     List<Map<String, dynamic>> dateFromHive = await mybox!.get('noti');
+  //     for (int i = 0; i > dateFromHive.length; i++) {
+  //       int week = dateFromHive[i]['week'];
+  //       int row = dateFromHive[i]['row'];
+  //       int column = dateFromHive[i]['column'];
+  //       String title = dateFromHive[i]['title'];
+  //       String description = dateFromHive[i]['description'];
+  //       allWeeksContent[week][row][column] = Center(
+  //           child: Column(
+  //         children: [
+  //           Text(
+  //             title,
+  //             style: const TextStyle(fontSize: 18),
+  //           ),
+  //           Text(
+  //             description,
+  //             style: const TextStyle(fontSize: 15),
+  //           )
+  //         ],
+  //       ));
+  //     }
+  //   }
+  // }
+
+  Future<void> retriveDateFromhive() async {
+    try {
+      if (!mybox!.isOpen) {
+        print('Hive box is not open');
+        return;
+      }
+
+      if (!mybox!.containsKey('noti')) {
+        print('No notifications stored');
+        return;
+      }
+
+      final List<Map<String, dynamic>> dataList = mybox!.get('noti');
+      final double height = MediaQuery.of(context).size.height;
+
+      for (final data in dataList) {
+        final int week = data['week'] ?? 0;
+        final int row = data['row'] ?? 0;
+        final int col = data['column'] ?? 0;
+        final String title = data['title'] ?? '';
+        final String description = data['description'] ?? '';
+        final String category = data['category'] ?? '';
+        final TimeOfDay? time = data['time'];
+
+        // Ensure week exists
+        while (week >= allWeeksContent.length) {
+          allWeeksContent.add(_createNewWeekContent());
+        }
+
+        // Ensure row exists
+        while (row >= allWeeksContent[week].length) {
+          allWeeksContent[week].add(List.filled(8, const Text('')));
+        }
+
+        // Ensure column exists
+        if (col >= allWeeksContent[week][row].length) continue;
+
+        // Recreate the original widget structure
+        allWeeksContent[week][row][col] = Container(
+          padding: const EdgeInsets.all(0),
+          height: height * 0.13,
+          width: double.infinity,
+          color: _getCategoryColor(category),
+          child: description.isEmpty
+              ? Center(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+        );
+
+        // Schedule notification if time exists
+        if (time != null && title.isNotEmpty) {
+          Notifications().scheduleNotification(
+            id: DateTime.now().millisecondsSinceEpoch % 100000,
+            title: title,
+            body: description,
+            hour: time.hour,
+            minute: time.minute,
+          );
+        }
+      }
+
+      setState(() {}); // Update UI after loading all data
+    } catch (e) {
+      print('Error loading data: $e');
+    }
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'Task':
+      case 'Assignment':
+        return const Color(0xffffa45b);
+      case 'Exam':
+        return const Color(0xffff6b6b);
+      case 'Material':
+        return const Color(0xff5f8cf8);
+      case 'Activity':
+        return const Color(0xffffe66d);
+      default:
+        return const Color(0xff9bb7fa);
     }
   }
 
@@ -523,15 +667,15 @@ class _StudyTimetableState extends State<StudyTimetable> {
                         }
                         pickTimeAndScheduleNotification(context,
                             taskController.text, Descriptioncontroller.text);
-                        int currentWeekOffset = _currentWeekOffset;
-                        print(
-                            '{$_currentWeekOffset  -  $rowIndex    -$colIndex   -${taskController.text.trim()}}  -${Descriptioncontroller.text.trim()}}');
+
                         Map<String, dynamic> notificationInfotoStore = {
                           "week": _currentWeekOffset,
                           "row": rowIndex,
                           'column': colIndex,
                           "title": taskController.text.trim(),
-                          "description": Descriptioncontroller.text.trim()
+                          "description": Descriptioncontroller.text.trim(),
+                          "category": selectedCategory,
+                          "time": startTime,
                         };
                         storeEoHive(notificationInfotoStore);
                       });
