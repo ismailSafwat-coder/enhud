@@ -8,6 +8,7 @@ import 'package:enhud/pages/settings/notification.dart';
 import 'package:enhud/pages/settings/privacypolicy.dart';
 import 'package:enhud/pages/settings/version_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -197,8 +198,12 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         InkWell(
-          onTap: () {
+          onTap: () async {
             Authservices().singout();
+            // Future<void> logoutFromFacebook() async {
+            //   await FacebookAuth.instance.logOut();
+            //   print("================User logged out from Facebook");
+            // }
 
             Navigator.pushAndRemoveUntil(
               context,

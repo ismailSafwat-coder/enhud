@@ -1,12 +1,15 @@
 import 'package:enhud/firebase_options.dart';
+import 'package:enhud/core/core.dart';
 import 'package:enhud/pages/authpages/loginpage.dart';
 import 'package:enhud/pages/homescreen.dart';
 import 'package:enhud/pages/notifications/notifications.dart';
+import 'package:enhud/pages/rest.dart';
 import 'package:enhud/pages/splachscreen.dart';
 import 'package:enhud/pages/test.dart';
 import 'package:enhud/test/hive.dart';
 import 'package:enhud/test/noti.dart';
 import 'package:enhud/widget/alertdialog/studytabeldialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
@@ -43,7 +46,6 @@ void main() async {
 
   //init notifications
   await Notifications().initNotification();
-  mybox = await openHiveBox('ismail');
 
   runApp(const MyApp());
 }
@@ -59,8 +61,28 @@ const TextStyle commonTextStyle = TextStyle(
   color: Colors.black,
 );
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      String userid = FirebaseAuth.instance.currentUser!.uid;
+      mybox = await openHiveBox(userid);
+      if (user == null) {
+        print('-------------User is currently signed out!');
+      } else {
+        print('-------------User is signed in!');
+        print('====================$userid');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +94,10 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: //
-            const HomeScreen()
+            FirebaseAuth.instance.currentUser != null
+                ? const HomeScreen()
+                : const LoginPage()
+
         // const HiveTestPage(),
         );
   }

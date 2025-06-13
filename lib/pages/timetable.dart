@@ -1,5 +1,6 @@
 import 'package:enhud/main.dart';
 import 'package:enhud/pages/notifications/notifications.dart';
+import 'package:enhud/pages/rest.dart';
 import 'package:enhud/widget/alertdialog/activity.dart';
 import 'package:enhud/widget/alertdialog/anthorclass.dart';
 import 'package:enhud/widget/alertdialog/assginmentdialog.dart';
@@ -376,12 +377,12 @@ class _StudyTimetableState extends State<StudyTimetable> {
   @override
   void initState() {
     super.initState();
+    RestartWidget.restartApp(context);
     _initNotifications();
     _initializeWeeksContent();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _loadTimeSlots(); // ← أولًا تحميل المواعيد
-      await retriveDateFromhive(); // ← ثم تحميل البيانات
-      setState(() {}); // ← تحديث ثانٍ بعد استعادة البيانات
+      await _loadTimeSlots();
+      await retriveDateFromhive();
     });
   }
 
