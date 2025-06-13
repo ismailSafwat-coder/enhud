@@ -1,3 +1,4 @@
+import 'package:enhud/pages/messages.dart';
 import 'package:enhud/pages/notificationscreen.dart';
 import 'package:enhud/pages/settings/notification.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,16 @@ class Homepage extends StatelessWidget {
                       ),
                       const Spacer(),
                       //first icon
-                      Image.asset('images/message.png'),
+                      InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const WeeklyReport()));
+                          },
+                          child: Container(
+                              child: Image.asset('images/message.png'))),
                       const SizedBox(
                         width: 10,
                       ),
@@ -46,8 +56,9 @@ class Homepage extends StatelessWidget {
                                 builder: (context) =>
                                     const NotificationsScreen()));
                           },
-                          child: Image.asset(
-                              'images/notificationvbellactive.png')),
+                          child: Container(
+                              child:
+                                  Image.asset('images/notificationvbell.png'))),
                     ],
                   ),
                 ),

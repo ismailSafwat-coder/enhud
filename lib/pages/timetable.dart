@@ -1,5 +1,3 @@
-// ... (keep your existing imports)
-
 import 'package:enhud/main.dart';
 import 'package:enhud/pages/notifications/notifications.dart';
 import 'package:enhud/widget/alertdialog/activity.dart';
@@ -10,6 +8,7 @@ import 'package:enhud/widget/alertdialog/freetime.dart';
 import 'package:enhud/widget/alertdialog/sleep.dart';
 import 'package:enhud/widget/alertdialog/taskdilog.dart';
 import 'package:flutter/material.dart';
+import 'package:enhud/core/core.dart';
 
 class StudyTimetable extends StatefulWidget {
   const StudyTimetable({super.key});
@@ -25,15 +24,15 @@ class _StudyTimetableState extends State<StudyTimetable> {
   String? _priority;
   TimeOfDay? startTime;
   // Track current week offset (0 = current week, 1 = next week, etc.)
-  int _currentWeekOffset = 0;
+  // int _currentWeekOffset = 0;
 
   // Store content for all weeks (week 0, week 1, etc.)
-  List<List<List<Widget>>> allWeeksContent = [];
-  List<String> timeSlots = [
-    '08:00 am - 09:00 am',
-    '09:00 am - 10:00 am',
-    '10:00 am - 11:00 am',
-  ];
+  //  allWeeksContent = [];
+  //  timeSlots = [
+  //   '08:00 am - 09:00 am',
+  //   '09:00 am - 10:00 am',
+  //   '10:00 am - 11:00 am',
+  // ];
 
   final List<String> categories = [
     "Material",
@@ -64,38 +63,38 @@ class _StudyTimetableState extends State<StudyTimetable> {
 
   List<List<Widget>> get _currentWeekContent {
     // Ensure we have content for the current week
-    while (_currentWeekOffset >= allWeeksContent.length) {
+    while (currentWeekOffset >= allWeeksContent.length) {
       allWeeksContent.add(_createNewWeekContent());
     }
-    return allWeeksContent[_currentWeekOffset];
+    return allWeeksContent[currentWeekOffset];
   }
 
   void _goToPreviousWeek() {
     setState(() {
-      _currentWeekOffset--;
-      if (_currentWeekOffset < 0) {
-        _currentWeekOffset = 0; // Don't go before week 0
+      currentWeekOffset--;
+      if (currentWeekOffset < 0) {
+        currentWeekOffset = 0; // Don't go before week 0
       }
     });
   }
 
   void _goToNextWeek() {
     setState(() {
-      _currentWeekOffset++;
+      currentWeekOffset++;
     });
   }
 
   String _getWeekTitle() {
-    if (_currentWeekOffset == 0) {
+    if (currentWeekOffset == 0) {
       return 'Current Week';
-    } else if (_currentWeekOffset == 1) {
+    } else if (currentWeekOffset == 1) {
       return 'Next Week';
-    } else if (_currentWeekOffset == -1) {
+    } else if (currentWeekOffset == -1) {
       return 'Last Week';
-    } else if (_currentWeekOffset > 1) {
-      return 'In $_currentWeekOffset Weeks';
+    } else if (currentWeekOffset > 1) {
+      return 'In $currentWeekOffset Weeks';
     } else {
-      return '${-_currentWeekOffset} Weeks Ago';
+      return '${-currentWeekOffset} Weeks Ago';
     }
   }
 
@@ -198,38 +197,6 @@ class _StudyTimetableState extends State<StudyTimetable> {
     }
   }
 
-  // Future retriveDateFromhive() async {
-  //   if (!mybox!.isOpen) {
-  //     print('Hive box is not open');
-  //   } else if (!mybox!.containsKey('noti')) {
-  //     print('Key "noti" does not exist in the box');
-  //   } else {
-  //     List<Map<String, dynamic>> dateFromHive = await mybox!.get('noti');
-  //     for (int i = 0; i > dateFromHive.length; i++) {
-  //       int week = dateFromHive[i]['week'];
-  //       int row = dateFromHive[i]['row'];
-  //       int column = dateFromHive[i]['column'];
-  //       String title = dateFromHive[i]['title'];
-  //       String description = dateFromHive[i]['description'];
-  //       allWeeksContent[week][row][column] = Center(
-  //           child: Column(
-
-  //         children: [
-  //           Text(
-  //             title,
-  //             style: const TextStyle(fontSize: 30),
-  //           ),
-  //           Text(
-  //             description,
-  //             style: const TextStyle(fontSize: 30),
-  //           )
-  //         ],
-  //       ));
-  //     }
-  //   }
-  //   setState(() {});
-  // }
-
   Future<void> retriveDateFromhive() async {
     try {
       if (!mybox!.isOpen) {
@@ -247,12 +214,16 @@ class _StudyTimetableState extends State<StudyTimetable> {
 
       for (final data in dataList) {
         final int week = data['week'] ?? 0;
-        final int row = data['row'] ?? 0;
-        final int col = data['column'] ?? 0;
+        final int row = data['row'] ?? 1;
+        final int col = data['column'] ?? 1;
         final String title = data['title'] ?? '';
         final String description = data['description'] ?? '';
         final String category = data['category'] ?? '';
-
+        print('Row index: $row, Col index: $col');
+        print(
+            'Current week content length: ${allWeeksContent[currentWeekOffset].length}');
+        print(
+            'Current row content length: ${allWeeksContent[currentWeekOffset][row].length}');
 //time slots
         while (allWeeksContent.length <= week) {
           allWeeksContent.add(List.generate(
@@ -399,9 +370,15 @@ class _StudyTimetableState extends State<StudyTimetable> {
     _initializeWeeksContent();
     // retriveDateFromhive();
 
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   await _loadTimeSlots();
+    //   await retriveDateFromhive();
+    // });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _loadTimeSlots();
-      await retriveDateFromhive();
+      await _loadTimeSlots(); // ← أولًا تحميل المواعيد
+      await retriveDateFromhive(); // ← ثم تحميل البيانات
+      setState(() {}); // ← تحديث ثانٍ بعد استعادة البيانات
     });
   }
 
@@ -416,7 +393,9 @@ class _StudyTimetableState extends State<StudyTimetable> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             setState(() {
-              _currentWeekOffset = 0;
+              mybox!.delete('noti');
+              mybox!.delete('timeSlots');
+              print('noti and timeSlots deleted ');
             });
           },
         ),
@@ -697,7 +676,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
                           );
 
                           Map<String, dynamic> notificationInfotoStore = {
-                            "week": _currentWeekOffset,
+                            "week": currentWeekOffset,
                             "row": rowIndex,
                             'column': colIndex,
                             "title": taskController.text.trim(),
@@ -707,7 +686,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
                           };
                           storeEoHive(notificationInfotoStore);
                           // Update the current week's content
-                          allWeeksContent[_currentWeekOffset][rowIndex]
+                          allWeeksContent[currentWeekOffset][rowIndex]
                               [colIndex] = Container(
                             padding: const EdgeInsets.all(0),
                             height: height * 0.13,
