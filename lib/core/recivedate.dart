@@ -27,6 +27,7 @@ class RetcivedateFromHive {
       }
 
       final List<Map<String, dynamic>> dataList = mybox!.get('noti');
+      print('====================$dataList');
       final double height = MediaQuery.of(context).size.height;
 
       for (final data in dataList) {

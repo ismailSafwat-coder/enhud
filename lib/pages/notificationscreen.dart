@@ -31,6 +31,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void initState() {
     super.initState();
     var data = mybox!.get('noti');
+
     if (data is List) {
       noti = List<Map<String, dynamic>>.from(data.map((item) {
         if (item is Map) {

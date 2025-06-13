@@ -24,10 +24,10 @@ class Studeytablepage extends StatefulWidget {
 }
 
 class _StudeytablepageState extends State<Studeytablepage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  // final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late double height;
   late double width;
-  String? _priority;
+  String? priority;
 
   int _currentWeekOffset = 0; // Track current week offset
   List<List<List<Widget>>> allWeeksContent = []; // Store content for all weeks
@@ -96,36 +96,63 @@ class _StudeytablepageState extends State<Studeytablepage> {
     }
   }
 
-  Future<void> retrieveDataFromHive() async {
+  Future<void> retriveDateFromhive() async {
     try {
-      if (!mybox!.isOpen) return;
-      if (!mybox!.containsKey('noti')) return;
+      if (!mybox!.isOpen) {
+        print('Hive box is not open');
+        return;
+      }
 
-      // تحويل البيانات إلى النوع الصحيح
-      final List<dynamic> dynamicList = mybox!.get('noti');
-      final List<Map<String, dynamic>> dataList = dynamicList
-          .whereType<Map<String, dynamic>>() // تصفية العناصر الصحيحة
-          .toList();
+      if (!mybox!.containsKey('noti')) {
+        print('No notifications stored');
+        return;
+      }
+
+      late List<Map<String, dynamic>> noti;
+      var data = mybox!.get('noti');
+      if (data is List) {
+        noti = List<Map<String, dynamic>>.from(data.map((item) {
+          if (item is Map) {
+            return Map<String, dynamic>.from(item);
+          } else {
+            // يمكنك هنا التعامل مع الحالة الغير متوقعة
+            return {};
+          }
+        }));
+      } else {
+        noti = [];
+      }
+      final double height = MediaQuery.of(context).size.height;
+
+      final List<Map<String, dynamic>> dataList = noti;
 
       for (final data in dataList) {
         final int week = data['week'] ?? 0;
-        final int row = data['row'] ?? 0;
-        final int col = data['column'] ?? 0;
+        final int row = data['row'] ?? 1;
+        final int col = data['column'] ?? 1;
         final String title = data['title'] ?? '';
         final String description = data['description'] ?? '';
         final String category = data['category'] ?? '';
-        // final String timeString = data['time'] ?? '';
 
-        // التأكد من وجود مساحة كافية في المصفوفات
+        while (allWeeksContent.length <= week) {
+          allWeeksContent.add(List.generate(
+              timeSlots.length, (_) => List.filled(8, const Text(''))));
+        }
+
+        // Ensure week exists
         while (week >= allWeeksContent.length) {
           allWeeksContent.add(_createNewWeekContent());
         }
 
+        // Ensure row exists
         while (row >= allWeeksContent[week].length) {
           allWeeksContent[week].add(List.filled(8, const Text('')));
         }
 
-        // إعادة بناء واجهة الخلية
+        // Ensure column exists
+        if (col >= allWeeksContent[week][row].length) continue;
+
+        // Recreate the original widget structure
         allWeeksContent[week][row][col] = Container(
           padding: const EdgeInsets.all(0),
           height: height * 0.13,
@@ -164,21 +191,21 @@ class _StudeytablepageState extends State<Studeytablepage> {
                 ),
         );
 
-        // إعادة جدولة الإشعار
-        // if (timeString.isNotEmpty) {
-        //   TimeOfDay? parsedTime = parseTime(timeString);
+        // Schedule notification if time exists
+        // if (title.isNotEmpty) {
         //   Notifications().scheduleNotification(
-        //     id: DateTime.now().millisecondsSinceEpoch % 1000000,
+        //     id: DateTime.now().millisecondsSinceEpoch % 100000,
         //     title: title,
         //     body: description,
-        //     hour: parsedTime.hour,
-        //     minute: parsedTime.minute,
+        //     hour: time.hour,
+        //     minute: time.minute,
         //   );
         // }
-        setState(() {});
       }
+
+      setState(() {}); // Update UI after loading all data
     } catch (e) {
-      print('حدث خطأ أثناء استرجاع البيانات: $e');
+      print('Error loading data: $e');
     }
   }
 
@@ -223,7 +250,7 @@ class _StudeytablepageState extends State<Studeytablepage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadTimeSlots();
-      await retrieveDataFromHive();
+      await retriveDateFromhive();
     });
   }
 

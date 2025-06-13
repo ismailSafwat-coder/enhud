@@ -209,8 +209,23 @@ class _StudyTimetableState extends State<StudyTimetable> {
         return;
       }
 
-      final List<Map<String, dynamic>> dataList = mybox!.get('noti');
+      late List<Map<String, dynamic>> noti;
+      var data = mybox!.get('noti');
+      if (data is List) {
+        noti = List<Map<String, dynamic>>.from(data.map((item) {
+          if (item is Map) {
+            return Map<String, dynamic>.from(item);
+          } else {
+            // يمكنك هنا التعامل مع الحالة الغير متوقعة
+            return {};
+          }
+        }));
+      } else {
+        noti = [];
+      }
       final double height = MediaQuery.of(context).size.height;
+
+      final List<Map<String, dynamic>> dataList = noti;
 
       for (final data in dataList) {
         final int week = data['week'] ?? 0;
@@ -219,12 +234,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
         final String title = data['title'] ?? '';
         final String description = data['description'] ?? '';
         final String category = data['category'] ?? '';
-        print('Row index: $row, Col index: $col');
-        print(
-            'Current week content length: ${allWeeksContent[currentWeekOffset].length}');
-        print(
-            'Current row content length: ${allWeeksContent[currentWeekOffset][row].length}');
-//time slots
+
         while (allWeeksContent.length <= week) {
           allWeeksContent.add(List.generate(
               timeSlots.length, (_) => List.filled(8, const Text(''))));
@@ -368,13 +378,6 @@ class _StudyTimetableState extends State<StudyTimetable> {
     super.initState();
     _initNotifications();
     _initializeWeeksContent();
-    // retriveDateFromhive();
-
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   await _loadTimeSlots();
-    //   await retriveDateFromhive();
-    // });
-
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadTimeSlots(); // ← أولًا تحميل المواعيد
       await retriveDateFromhive(); // ← ثم تحميل البيانات
