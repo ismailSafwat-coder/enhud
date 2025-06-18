@@ -25,7 +25,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     "Another Class": ""
   };
 
-  late List<Map<String, dynamic>> noti;
+  List<Map<String, dynamic>> noti = [];
 
   @override
   void initState() {
@@ -67,33 +67,40 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               padding: const EdgeInsets.all(16),
               itemCount: noti.length,
               itemBuilder: (context, index) {
-                return NotificationCard(notification: noti[index]);
+                return NotificationCard(notification: noti[index], noti: noti);
               },
             ),
     );
   }
 }
 
-class NotificationCard extends StatelessWidget {
+class NotificationCard extends StatefulWidget {
   final Map<String, dynamic> notification;
+  final List<Map<String, dynamic>> noti;
 
-  const NotificationCard({super.key, required this.notification});
+  const NotificationCard(
+      {super.key, required this.notification, required this.noti});
 
+  @override
+  State<NotificationCard> createState() => _NotificationCardState();
+}
+
+class _NotificationCardState extends State<NotificationCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: notification['category'] == 'Task'
+        color: widget.notification['category'] == 'Task'
             ? const Color(0xffffa45b)
-            : notification['category'] == 'Assignment'
+            : widget.notification['category'] == 'Assignment'
                 ? const Color(0xffffa45b)
-                : notification['category'] == 'Exam'
+                : widget.notification['category'] == 'Exam'
                     ? const Color(0xffff6b6b)
-                    : notification['category'] == 'Material'
+                    : widget.notification['category'] == 'Material'
                         ? const Color(0xff5f8cf8)
-                        : notification['category'] == 'Activity'
+                        : widget.notification['category'] == 'Activity'
                             ? const Color(0xffffe66d)
                             : const Color(0xff9bb7fa),
         borderRadius: BorderRadius.circular(10),
@@ -106,17 +113,17 @@ class NotificationCard extends StatelessWidget {
               const Text("• ",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               Text(
-                notification['title'],
+                widget.notification['title'],
                 style:
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const Text("  •  "),
-              Text(notification['category'] ?? '',
+              Text(widget.notification['category'] ?? '',
                   style: const TextStyle(fontSize: 14)),
               const Spacer(),
               const Icon(Icons.access_time, size: 16),
               const SizedBox(width: 4),
-              Text(notification['time'] ?? '',
+              Text(widget.notification['time'] ?? '',
                   // "3",
                   style: const TextStyle(fontSize: 14)),
             ],
@@ -124,16 +131,48 @@ class NotificationCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             getmotivationmessage(
-                notification['category'], notification['title']),
+                widget.notification['category'], widget.notification['title']),
           ),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () {},
-                child: const Text("Done",
-                    style: TextStyle(
+                onPressed: () {
+                  if (widget.notification['done'] == true) {
+                    widget.notification['done'] = false;
+                    setState(() {});
+                    mybox!.put('noti', widget.noti);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Notification marked as undone"),
+                        duration: Duration(seconds: 2)));
+                    return;
+                  }
+                  // Mark notification as done
+                  widget.notification['done'] = true;
+                  setState(() {});
+                  mybox!.put('noti', widget.noti);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: const Text("Notification marked as done"),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            widget.notification['done'] = false;
+                            setState(() {});
+
+                            mybox!.put('noti', widget.noti);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Notification marked as undone"),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          })));
+                },
+                child: Text(
+                    widget.notification['done'] == true ? "undo" : "Done",
+                    style: const TextStyle(
                         color: Colors.black, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(width: 10),

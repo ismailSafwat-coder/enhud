@@ -38,15 +38,29 @@ Future<void> requestNotificationPermission() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  requestNotificationPermission();
+  await requestNotificationPermission();
 
-  // Get current device timezone
+  // Init Hive early
+  final appDocumentDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDir.path);
 
+  // Init Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  //init notifications
+  // Init notifications
   await Notifications().initNotification();
 
+  // Get current user synchronously
+  User? currentUser = FirebaseAuth.instance.currentUser;
+
+  if (currentUser != null) {
+    // Open Hive box for current user
+    mybox = await openHiveBox(currentUser.uid);
+    print('-------------User is signed in!');
+    print('====================${currentUser.uid}');
+  }
+
+  // Run the app
   runApp(const MyApp());
 }
 
@@ -72,16 +86,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
-      String userid = FirebaseAuth.instance.currentUser!.uid;
-      mybox = await openHiveBox(userid);
-      if (user == null) {
-        print('-------------User is currently signed out!');
-      } else {
-        print('-------------User is signed in!');
-        print('====================$userid');
-      }
-    });
   }
 
   @override

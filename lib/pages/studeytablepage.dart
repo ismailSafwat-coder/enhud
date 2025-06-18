@@ -1,4 +1,5 @@
 // ... (keep your existing imports)
+import 'package:enhud/core/core.dart';
 import 'package:enhud/main.dart';
 import 'package:enhud/pages/notifications/notifications.dart';
 import 'package:enhud/widget/alertdialog/activity.dart';
@@ -125,6 +126,7 @@ class _StudeytablepageState extends State<Studeytablepage> {
       final double height = MediaQuery.of(context).size.height;
 
       final List<Map<String, dynamic>> dataList = noti;
+      notificationItemMap = dataList;
 
       for (final data in dataList) {
         final int week = data['week'] ?? 0;

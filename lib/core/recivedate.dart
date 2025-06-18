@@ -26,7 +26,8 @@ class RetcivedateFromHive {
         }
       }
 
-      final List<Map<String, dynamic>> dataList = mybox!.get('noti');
+      final List<Map<String, dynamic>> dataList = await mybox!.get('noti');
+      notificationItemMap = dataList;
       print('====================$dataList');
       final double height = MediaQuery.of(context).size.height;
 

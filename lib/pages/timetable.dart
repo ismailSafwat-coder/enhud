@@ -24,6 +24,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
   late double width;
   String? _priority;
   TimeOfDay? startTime;
+  int id = DateTime.now().millisecondsSinceEpoch % 1000000000;
   // Track current week offset (0 = current week, 1 = next week, etc.)
   // int _currentWeekOffset = 0;
 
@@ -227,6 +228,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
       final double height = MediaQuery.of(context).size.height;
 
       final List<Map<String, dynamic>> dataList = noti;
+      notificationItemMap = dataList;
 
       for (final data in dataList) {
         final int week = data['week'] ?? 0;
@@ -680,12 +682,16 @@ class _StudyTimetableState extends State<StudyTimetable> {
                           );
 
                           Map<String, dynamic> notificationInfotoStore = {
+                            'id': id,
+                            "weeknumber": DateTime.now().weekday,
+                            "daynumber": DateTime.now().day,
                             "week": currentWeekOffset,
                             "row": rowIndex,
                             'column': colIndex,
                             "title": taskController.text.trim(),
                             "description": Descriptioncontroller.text.trim(),
                             "category": selectedCategory,
+                            "done": false,
                             "time": _extractFirstTime(timeSlots[rowIndex]),
                           };
                           storeEoHive(notificationInfotoStore);

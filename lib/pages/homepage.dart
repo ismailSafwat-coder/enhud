@@ -1,14 +1,22 @@
+import 'package:enhud/core/core.dart';
 import 'package:enhud/pages/messages.dart';
 import 'package:enhud/pages/notificationscreen.dart';
 import 'package:enhud/pages/settings/notification.dart';
+import 'package:enhud/pages/todayschedule.dart';
+import 'package:enhud/test/noti.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../main.dart';
 
-class Homepage extends StatelessWidget {
+class Homepage extends StatefulWidget {
   const Homepage({super.key});
 
+  @override
+  State<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,33 +79,7 @@ class Homepage extends StatelessWidget {
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: const Color(0xFF7d7d7d))),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      //text
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Today Schedule :',
-                          style: TextStyle(
-                              fontSize: 25, fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                      //listview card
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            card(),
-                            card(),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
+                  child: const Todayschedule(),
                 ),
                 //material studing
                 const SizedBox(
@@ -192,96 +174,6 @@ class Homepage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  SizedBox card() {
-    return SizedBox(
-        height: 210,
-        width: 350,
-        child: Card(
-          margin: const EdgeInsets.all(8),
-          color: const Color(0xFF5f8cf8),
-          child: Container(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                //fist row
-                Row(
-                  children: [
-                    const Text(
-                      'Up Coming',
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    const SizedBox(
-                      width: 70,
-                    ),
-                    Row(
-                      children: [
-                        Image.asset('images/timer.png'),
-                        const Text(
-                          ' 0hrs 30mins',
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-                //secound row
-                const SizedBox(
-                  height: 15,
-                ),
-                Row(
-                  children: [
-                    //image
-                    Image.asset(
-                      'images/teacherpic.png',
-                      fit: BoxFit.fill,
-                      height: 90,
-                      width: 70,
-                    ),
-                    //column teacher and material
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Teacher : Mr.Mohamed Shaban',
-                          style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400),
-                        ),
-                        Text(
-                          'material : physics',
-                          style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                //text
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      fit: BoxFit.fill,
-                      'images/clock1.png',
-                      width: 20,
-                      height: 20,
-                    ),
-                    const Text(
-                      '  8:00am, 23 oct, Sat',
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    )
-                  ],
-                )
-              ],
-            ),
-          ),
-        ));
   }
 
   Row materilsfile(String name, double? percent) {

@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     index = widget.homeindex ?? index;
-    RetcivedateFromHive().retriveDateFromhive(context);
+    // Initialize the Hive box to retrieve data
 
     super.initState();
   }
