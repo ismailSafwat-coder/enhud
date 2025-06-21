@@ -33,9 +33,9 @@ class Authservices {
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'uid': uid,
         "gender": gender,
-        'Acdemic': Acdamic,
+        'academicYear': Acdamic,
         'email': user.email,
-        'displayName': user.displayName ?? name,
+        'name': user.displayName ?? name,
         'photoURL': user.photoURL ?? url,
         'createdAt': FieldValue.serverTimestamp(),
         // Add other fields as needed

@@ -22,7 +22,7 @@ class _AccountinfoPageState extends State<AccountinfoPage> {
       backgroundColor: Colors.white,
       body: FutureBuilder(
         future: FirebaseFirestore.instance
-            .collection('user')
+            .collection('users')
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .get(),
         builder: (context, snapshot) {
@@ -50,10 +50,11 @@ class _AccountinfoPageState extends State<AccountinfoPage> {
                       //image
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 35,
-                            backgroundImage:
-                                NetworkImage(" ${userData['url']}"),
+                          const CircleAvatar(
+                            radius: 25,
+                            backgroundImage: AssetImage(
+                              'images/accountimage.png',
+                            ),
                           ),
                           Text(
                             ' Hi, ${userData['name'].toString().trimLeft()}',
@@ -158,7 +159,7 @@ class _AccountinfoPageState extends State<AccountinfoPage> {
                         child: TextFormField(
                           readOnly: true,
                           decoration: InputDecoration(
-                              hintText: '3rd year',
+                              hintText: '${userData['academicYear']}',
                               hintStyle: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w400,
