@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -6,12 +7,43 @@ import 'package:google_sign_in/google_sign_in.dart';
 class Authservices {
   // Get instance of firebase auth
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Get current user
   User? getcurrentuser() {
     return _firebaseAuth.currentUser;
+  }
+
+  Future<void> addUserInfoToFirestore(
+    String? name,
+    String Acdamic,
+    String gender,
+  ) async {
+    try {
+      // Get current authenticated user
+      User? user = FirebaseAuth.instance.currentUser;
+      String uid = user!.uid;
+      String url =
+          "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=";
+
+      // Check if user is logged in
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'uid': uid,
+        "gender": gender,
+        'Acdemic': Acdamic,
+        'email': user.email,
+        'displayName': user.displayName ?? name,
+        'photoURL': user.photoURL ?? url,
+        'createdAt': FieldValue.serverTimestamp(),
+        // Add other fields as needed
+      });
+    } catch (e) {
+      print("Error saving user data: $e");
+      rethrow;
+    }
   }
 
   // Sign in

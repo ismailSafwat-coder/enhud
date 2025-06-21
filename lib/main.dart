@@ -1,24 +1,17 @@
 import 'package:enhud/firebase_options.dart';
-import 'package:enhud/core/core.dart';
+
 import 'package:enhud/pages/authpages/loginpage.dart';
 import 'package:enhud/pages/homescreen.dart';
 import 'package:enhud/pages/notifications/notifications.dart';
-import 'package:enhud/pages/rest.dart';
-import 'package:enhud/pages/splachscreen.dart';
-import 'package:enhud/pages/test.dart';
-import 'package:enhud/test/hive.dart';
-import 'package:enhud/test/noti.dart';
-import 'package:enhud/widget/alertdialog/studytabeldialog.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'pages/text.dart';
 
 Box? mybox;
 
@@ -84,10 +77,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

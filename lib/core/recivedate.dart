@@ -4,85 +4,82 @@ import 'package:flutter/material.dart';
 
 class RetcivedateFromHive {
   Future<void> retriveDateFromhive(BuildContext context) async {
-    try {
-      if (!mybox!.isOpen) {
-        print('Hive box is not open');
-        return;
+    if (!mybox!.isOpen || !mybox!.containsKey('timeSlots')) return;
+    final List<String> savedSlots = mybox!.get('timeSlots');
+
+    timeSlots = savedSlots;
+    for (var weekContent in allWeeksContent) {
+      while (weekContent.length < timeSlots.length) {
+        weekContent.add(List.filled(8, const Text('')));
       }
+    }
 
-      if (!mybox!.containsKey('noti')) {
-        print('No notifications stored');
-        return;
-      }
-      if (!mybox!.isOpen || !mybox!.containsKey('timeSlots')) return;
-
-      final List<String> savedSlots = mybox!.get('timeSlots');
-
-      timeSlots = savedSlots;
-      // Initialize content for all weeks based on loaded time slots
-      for (var weekContent in allWeeksContent) {
-        while (weekContent.length < timeSlots.length) {
-          weekContent.add(List.filled(8, const Text('')));
-        }
-      }
-
-      final List<Map<String, dynamic>> dataList = await mybox!.get('noti');
-      notificationItemMap = dataList;
-      print('====================$dataList');
-      final double height = MediaQuery.of(context).size.height;
-
-      for (final data in dataList) {
-        final int week = data['week'] ?? 0;
-        final int row = data['row'] ?? 1;
-        final int col = data['column'] ?? 1;
-        final String title = data['title'] ?? '';
-        final String description = data['description'] ?? '';
-        final String category = data['category'] ?? '';
-        print('Row index: $row, Col index: $col');
-        print(
-            'Current week content length: ${allWeeksContent[currentWeekOffset].length}');
-        print(
-            'Current row content length: ${allWeeksContent[currentWeekOffset][row].length}');
-//time slots
-        while (allWeeksContent.length <= week) {
-          allWeeksContent.add(List.generate(
-              timeSlots.length, (_) => List.filled(8, const Text(''))));
+    Future<void> retriveDateFromhive() async {
+      try {
+        if (!mybox!.isOpen) {
+          print('Hive box is not open');
+          return;
         }
 
-        // Ensure week exists
-        while (week >= allWeeksContent.length) {
-          allWeeksContent.add(_createNewWeekContent());
+        if (!mybox!.containsKey('noti')) {
+          print('No notifications stored');
+          return;
         }
 
-        // Ensure row exists
-        while (row >= allWeeksContent[week].length) {
-          allWeeksContent[week].add(List.filled(8, const Text('')));
+        late List<Map<String, dynamic>> noti;
+        var data = mybox!.get('noti');
+        if (data is List) {
+          noti = List<Map<String, dynamic>>.from(data.map((item) {
+            if (item is Map) {
+              return Map<String, dynamic>.from(item);
+            } else {
+              // يمكنك هنا التعامل مع الحالة الغير متوقعة
+              return {};
+            }
+          }));
+        } else {
+          noti = [];
         }
+        final double height = MediaQuery.of(context).size.height;
 
-        // Ensure column exists
-        if (col >= allWeeksContent[week][row].length) continue;
+        final List<Map<String, dynamic>> dataList = noti;
+        notificationItemMap = dataList;
 
-        // Recreate the original widget structure
-        allWeeksContent[week][row][col] = Container(
-          padding: const EdgeInsets.all(0),
-          height: height * 0.13,
-          width: double.infinity,
-          color: _getCategoryColor(category),
-          child: description.isEmpty
-              ? Center(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
+        for (final data in dataList) {
+          final int week = data['week'] ?? 0;
+          final int row = data['row'] ?? 1;
+          final int col = data['column'] ?? 1;
+          final String title = data['title'] ?? '';
+          final String description = data['description'] ?? '';
+          final String category = data['category'] ?? '';
+
+          while (allWeeksContent.length <= week) {
+            allWeeksContent.add(List.generate(
+                timeSlots.length, (_) => List.filled(8, const Text(''))));
+          }
+
+          // Ensure week exists
+          while (week >= allWeeksContent.length) {
+            allWeeksContent.add(_createNewWeekContent());
+          }
+
+          // Ensure row exists
+          while (row >= allWeeksContent[week].length) {
+            allWeeksContent[week].add(List.filled(8, const Text('')));
+          }
+
+          // Ensure column exists
+          if (col >= allWeeksContent[week][row].length) continue;
+
+          // Recreate the original widget structure
+          allWeeksContent[week][row][col] = Container(
+            padding: const EdgeInsets.all(0),
+            height: height * 0.13,
+            width: double.infinity,
+            color: _getCategoryColor(category),
+            child: description.isEmpty
+                ? Center(
+                    child: Text(
                       title,
                       style: const TextStyle(
                         color: Colors.white,
@@ -90,30 +87,44 @@ class RetcivedateFromHive {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      description,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-        );
+                      Text(
+                        description,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+          );
 
-        // Schedule notification if time exists
-        // if (title.isNotEmpty) {
-        //   Notifications().scheduleNotification(
-        //     id: DateTime.now().millisecondsSinceEpoch % 100000,
-        //     title: title,
-        //     body: description,
-        //     hour: time.hour,
-        //     minute: time.minute,
-        //   );
-        // }
+          // Schedule notification if time exists
+          // if (title.isNotEmpty) {
+          //   Notifications().scheduleNotification(
+          //     id: DateTime.now().millisecondsSinceEpoch % 100000,
+          //     title: title,
+          //     body: description,
+          //     hour: time.hour,
+          //     minute: time.minute,
+          //   );
+          // }
+        }
+        // Update UI after loading all data
+      } catch (e) {
+        print('Error loading data: $e');
       }
-    } catch (e) {
-      print('Error loading data: $e');
     }
   }
 

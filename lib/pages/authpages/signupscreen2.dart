@@ -76,40 +76,41 @@ class _Signupscreen2State extends State<Signupscreen2> {
                     ),
                     Custombuttom1(
                         onPressed: () async {
-                          if (formkey.currentState!.validate()) {
-                            if (selectedGender == null) {
+                          if (formkey.currentState!.validate() &&
+                              selectedGender != "") {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            String auth = await Authservices().signup(
+                                emailcontroller.text,
+                                passwordcontroller.text,
+                                context);
+                            isLoading = false;
+                            setState(() {});
+                            if (auth == 'succeed') {
                               showDialog(
                                 context: context,
-                                builder: (context) => const AlertDialog(
-                                  content: Text('select gender'),
+                                builder: (context) => CustomDialog(
+                                  text:
+                                      'You have successfully created an account .',
+                                  title:
+                                      'Welcome ${fullnamecontroller.text} ^_^',
                                 ),
                               );
-                            } else {
-                              setState(() {
-                                isLoading = true;
-                              });
-                              String auth = await Authservices().signup(
-                                  emailcontroller.text,
-                                  passwordcontroller.text,
-                                  context);
-                              isLoading = false;
-                              setState(() {});
-                              if (auth == 'succeed') {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => CustomDialog(
-                                    text:
-                                        'You have successfully created an account .',
-                                    title:
-                                        'Welcome ${fullnamecontroller.text} ^_^',
-                                  ),
-                                );
-                              }
                             }
+                            Authservices().addUserInfoToFirestore(
+                              fullnamecontroller.text,
+                              acdamicyearcontroller.text.trim(),
+                              selectedGender!,
+                            );
                           } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('plz fill all fileds')),
+                            );
                             toppadding = 0;
                             setState(() {
-                              // isLoading =false ;
+                              isLoading = false;
                             });
                           }
                         },
@@ -261,12 +262,14 @@ class _Signupscreen2State extends State<Signupscreen2> {
                     const SizedBox(
                       height: 2,
                     ),
-                    Mytextformfiled(validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Acdamic year is required";
-                      }
-                      return null;
-                    }),
+                    Mytextformfiled(
+                        controller: acdamicyearcontroller,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Acdamic year is required";
+                          }
+                          return null;
+                        }),
                     const SizedBox(
                       height: 10,
                     ),
@@ -362,7 +365,7 @@ class _Signupscreen2State extends State<Signupscreen2> {
                             .toList(),
                         onChanged: (value) {
                           setState(() {
-                            selectedGender = value;
+                            selectedGender = value!;
                           });
                         },
                       ),

@@ -1,14 +1,7 @@
 // ... (keep your existing imports)
 import 'package:enhud/core/core.dart';
 import 'package:enhud/main.dart';
-import 'package:enhud/pages/notifications/notifications.dart';
-import 'package:enhud/widget/alertdialog/activity.dart';
-import 'package:enhud/widget/alertdialog/anthorclass.dart';
-import 'package:enhud/widget/alertdialog/assginmentdialog.dart';
-import 'package:enhud/widget/alertdialog/exam.dart';
-import 'package:enhud/widget/alertdialog/freetime.dart';
-import 'package:enhud/widget/alertdialog/sleep.dart';
-import 'package:enhud/widget/alertdialog/taskdilog.dart';
+
 import 'package:flutter/material.dart';
 
 const commonTextStyle = TextStyle(
@@ -30,8 +23,8 @@ class _StudeytablepageState extends State<Studeytablepage> {
   late double width;
   String? priority;
 
-  int _currentWeekOffset = 0; // Track current week offset
-  List<List<List<Widget>>> allWeeksContent = []; // Store content for all weeks
+  final int _currentWeekOffset = 0; // Track current week offset
+  // Store content for all weeks
 
   List<String> timeSlots = [
     '08:00 am - 09:00 am',
@@ -70,19 +63,6 @@ class _StudeytablepageState extends State<Studeytablepage> {
     return allWeeksContent[_currentWeekOffset];
   }
 
-  void _goToPreviousWeek() {
-    setState(() {
-      _currentWeekOffset--;
-      if (_currentWeekOffset < 0) _currentWeekOffset = 0;
-    });
-  }
-
-  void _goToNextWeek() {
-    setState(() {
-      _currentWeekOffset++;
-    });
-  }
-
   String _getWeekTitle() {
     if (_currentWeekOffset == 0) {
       return 'Current Week';
@@ -94,120 +74,6 @@ class _StudeytablepageState extends State<Studeytablepage> {
       return 'In $_currentWeekOffset Weeks';
     } else {
       return '${-_currentWeekOffset} Weeks Ago';
-    }
-  }
-
-  Future<void> retriveDateFromhive() async {
-    try {
-      if (!mybox!.isOpen) {
-        print('Hive box is not open');
-        return;
-      }
-
-      if (!mybox!.containsKey('noti')) {
-        print('No notifications stored');
-        return;
-      }
-
-      late List<Map<String, dynamic>> noti;
-      var data = mybox!.get('noti');
-      if (data is List) {
-        noti = List<Map<String, dynamic>>.from(data.map((item) {
-          if (item is Map) {
-            return Map<String, dynamic>.from(item);
-          } else {
-            // يمكنك هنا التعامل مع الحالة الغير متوقعة
-            return {};
-          }
-        }));
-      } else {
-        noti = [];
-      }
-      final double height = MediaQuery.of(context).size.height;
-
-      final List<Map<String, dynamic>> dataList = noti;
-      notificationItemMap = dataList;
-
-      for (final data in dataList) {
-        final int week = data['week'] ?? 0;
-        final int row = data['row'] ?? 1;
-        final int col = data['column'] ?? 1;
-        final String title = data['title'] ?? '';
-        final String description = data['description'] ?? '';
-        final String category = data['category'] ?? '';
-
-        while (allWeeksContent.length <= week) {
-          allWeeksContent.add(List.generate(
-              timeSlots.length, (_) => List.filled(8, const Text(''))));
-        }
-
-        // Ensure week exists
-        while (week >= allWeeksContent.length) {
-          allWeeksContent.add(_createNewWeekContent());
-        }
-
-        // Ensure row exists
-        while (row >= allWeeksContent[week].length) {
-          allWeeksContent[week].add(List.filled(8, const Text('')));
-        }
-
-        // Ensure column exists
-        if (col >= allWeeksContent[week][row].length) continue;
-
-        // Recreate the original widget structure
-        allWeeksContent[week][row][col] = Container(
-          padding: const EdgeInsets.all(0),
-          height: height * 0.13,
-          width: double.infinity,
-          color: _getCategoryColor(category),
-          child: description.isEmpty
-              ? Center(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      description,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ],
-                ),
-        );
-
-        // Schedule notification if time exists
-        // if (title.isNotEmpty) {
-        //   Notifications().scheduleNotification(
-        //     id: DateTime.now().millisecondsSinceEpoch % 100000,
-        //     title: title,
-        //     body: description,
-        //     hour: time.hour,
-        //     minute: time.minute,
-        //   );
-        // }
-      }
-
-      setState(() {}); // Update UI after loading all data
-    } catch (e) {
-      print('Error loading data: $e');
     }
   }
 
@@ -252,7 +118,7 @@ class _StudeytablepageState extends State<Studeytablepage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadTimeSlots();
-      await retriveDateFromhive();
+      // await retriveDateFromhive();
     });
   }
 
@@ -361,18 +227,7 @@ class _StudeytablepageState extends State<Studeytablepage> {
       appBar: AppBar(
         leading:
             IconButton(icon: const Icon(Icons.arrow_back), onPressed: () {}),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-                icon: const Icon(Icons.arrow_back_ios),
-                onPressed: _goToPreviousWeek),
-            Text(_getWeekTitle()),
-            IconButton(
-                icon: const Icon(Icons.arrow_forward_ios),
-                onPressed: _goToNextWeek),
-          ],
-        ),
+        title: Text(_getWeekTitle()),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

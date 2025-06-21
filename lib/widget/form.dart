@@ -190,6 +190,11 @@ class _CustomFormState extends State<CustomForm> {
                 onTap: () async {
                   String result = await Authservices().signInWithFacebook();
                   if (result == 'success') {
+                    Authservices().addUserInfoToFirestore(
+                      emailcontroller.text.trimLeft(),
+                      "not enterted",
+                      "not enterd",
+                    );
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
@@ -213,30 +218,32 @@ class _CustomFormState extends State<CustomForm> {
           const SizedBox(
             height: 30,
           ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: const Color(0xFF609cf7),
-            ),
-            height: 50,
-            width: 210,
-            child: Center(
-              child: TextButton(
-                child: const Text('Login',
-                    style: TextStyle(fontSize: 21, color: Colors.white)),
-                onPressed: () async {
-                  String auth = await Authservices().signin(
-                      email: emailcontroller.text,
-                      password: passwordcontroller.text,
-                      context: context);
-                  if (auth == 'succeed') {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const HomeScreen()));
-                  }
-                },
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF609cf7),
+              minimumSize: const Size(210, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
+            ),
+            onPressed: () async {
+              if (formState.currentState!.validate()) {
+                String auth = await Authservices().signin(
+                  email: emailcontroller.text,
+                  password: passwordcontroller.text,
+                  context: context,
+                );
+                if (auth == 'succeed') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  );
+                }
+              }
+            },
+            child: const Text(
+              'Login',
+              style: TextStyle(fontSize: 21, color: Colors.white),
             ),
           ),
           const SizedBox(

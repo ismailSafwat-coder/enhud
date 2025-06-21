@@ -59,44 +59,41 @@ class _TodayscheduleState extends State<Todayschedule> {
                   return Center(
                       child: Text('Error: ${snapshot.error.toString()}'));
                 }
-                return ListView.builder(
-                    itemCount: noti.length,
-                    padding: const EdgeInsets.all(16),
-                    itemBuilder: (context, index) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          //text
-                          const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'Today Schedule :',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                          //listview card
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
+                return Column(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Today Schedule :',
+                        style: TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 250,
+                      child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: noti.length,
+                          padding: const EdgeInsets.all(16),
+                          itemBuilder: (context, index) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                card(noti, index),
-                                card(noti, index),
+                                //text
+                                mycard(noti, index),
+                                //listview card
                               ],
-                            ),
-                          )
-                        ],
-                      );
-                    });
+                            );
+                          }),
+                    ),
+                  ],
+                );
               },
             ),
           );
   }
 
-  SizedBox card(List<Map<String, dynamic>> noti, int index) {
+  SizedBox mycard(List<Map<String, dynamic>> noti, int index) {
     return SizedBox(
         height: 210,
         width: 350,
@@ -106,7 +103,7 @@ class _TodayscheduleState extends State<Todayschedule> {
           child: Container(
             padding: const EdgeInsets.all(15.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 //fist row
                 Row(
