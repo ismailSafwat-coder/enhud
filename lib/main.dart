@@ -87,10 +87,14 @@ class _MyAppState extends State<MyApp> {
           scaffoldBackgroundColor: Colors.white,
           useMaterial3: true,
         ),
-        home: //
-            FirebaseAuth.instance.currentUser != null
+        home: AnimatedSplashScreen(
+            duration: 7000,
+            centered: true,
+            splashIconSize: 5000,
+            splash: "images/enhudintro-ezgif.com-resize.gif",
+            nextScreen: FirebaseAuth.instance.currentUser != null
                 ? const HomeScreen()
-                : const LoginPage()
+                : const LoginPage())
 
         // const HiveTestPage(),
         );
