@@ -1,5 +1,6 @@
 import 'package:enhud/pages/forgetpassword2.dart';
 import 'package:enhud/widget/mytextformfiled.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Forgetpassword1 extends StatefulWidget {
@@ -11,6 +12,7 @@ class Forgetpassword1 extends StatefulWidget {
 
 class _Forgetpassword1State extends State<Forgetpassword1> {
   GlobalKey<FormState> formkey = GlobalKey<FormState>();
+  TextEditingController email = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +79,7 @@ class _Forgetpassword1State extends State<Forgetpassword1> {
                           height: 2,
                         ),
                         Mytextformfiled(
+                          controller: email,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Please enter your email";
@@ -92,11 +95,44 @@ class _Forgetpassword1State extends State<Forgetpassword1> {
                           height: 25,
                         ),
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (formkey.currentState!.validate()) {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) =>
-                                      const Forgetpassword2()));
+                              // Navigator.of(context).push(MaterialPageRoute(
+                              //     builder: (context) =>
+                              //         const Forgetpassword2()));
+                              try {
+                                await FirebaseAuth.instance
+                                    .sendPasswordResetEmail(email: email.text);
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Reset Email Sent"),
+                                    content: const Text(
+                                        "A password reset email has been sent to your inbox."),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
+                                        },
+                                        child: const Text("OK"),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              } on FirebaseAuthException catch (e) {
+                                String message = '';
+                                if (e.code == 'user-not-found') {
+                                  message = 'No user found for that email.';
+                                } else {
+                                  message =
+                                      'Something went wrong: ${e.message}';
+                                }
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(message)),
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(
